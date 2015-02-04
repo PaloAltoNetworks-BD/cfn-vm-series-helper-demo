@@ -1,0 +1,168 @@
+- name: setup protected server stack
+  hosts: 127.0.0.1
+  connection: local
+
+  vars:
+    dns_server_primary: 8.8.8.8
+    dns_server_secondary: 8.8.4.4
+    panorama_primary: 172.16.31.1.4
+    panorama_secondary: 172.16.31.1.6
+
+  tasks:
+  - name: wait for SSH (timeout 10min)
+    wait_for: port=22 host="{{PAVMAWSEIPMgmt}}" search_regex=SSH timeout=600
+  - name: set admin password
+    panos_admpwd: ip_address="{{PAVMAWSEIPMgmt}}" key_filename="{{key_filename}}" password="{{admin_password}}"
+    register: result
+    until: not result|failed
+    retries: 10
+    delay: 30
+  - name: waiting for commit to finish
+    panos_check: 
+      ip_address: "{{PAVMAWSEIPMgmt}}" 
+      password: "{{admin_password}}"
+    register: result
+    until: not result|failed
+    retries: 10
+    delay: 10
+  - name: delete admin SSH public key
+    panos_sshkey:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      admin_username: "admin"
+      state: "absent"
+  - name: set dns and panorama
+    panos_mgtconfig:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      dns_server_primary: "{{dns_server_primary}}"
+      dns_server_secondary: "{{dns_server_secondary}}"
+      panorama_primary: "{{panorama_primary}}"
+      panorama_secondary: "{{panorama_secondary}}"
+  - name: configure ethernet1/1
+    panos_dhcpif:
+      password: "{{admin_password}}"
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      if_name: "ethernet1/1"
+      zone_name: "public"
+      create_default_route: "yes"
+  - name: configure ethernet1/2
+    panos_dhcpif:
+      password: "{{admin_password}}"
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      if_name: "ethernet1/2"
+      zone_name: "private"
+      create_default_route: "no"
+  - name: create bidirectional source nat rule for server
+    panos_snat:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      rule_name: "snat"
+      bidirectional: "true"
+      snat_type: "static-ip"
+      translated_address: "{{PAVMAWSPublicIP}}"
+      from_zone: "private"
+      to_zone: "public"
+      source: "{{ServerIP}}"
+      destination: "any"
+      service: "any"
+  - name: create custom app for EIP PublicDNS
+    panos_cstapphost:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      app_name: "newwebapp"
+      host_regex: "{{PAVMAWSEIPPublicDNS}}"
+      convert_hostname: "true"
+  - name: create defult security profile group
+    panos_pg:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      username: "admin"
+      pg_name: "pg-default"
+      virus: "default"
+      spyware: "default"
+      vulnerability: "default"
+  - name: create security rule for server
+    panos_srule:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      rule_name: "server permit"
+      from_zone: ["public"]
+      to_zone: ["private"]
+      source: ["any"]
+      source_user: ["any"]
+      destination: ["{{PAVMAWSPublicIP}}"]
+      category: ["any"]
+      application: ["ssh", "newwebapp", "web-browsing"]
+      service: ["application-default"]
+      hip_profiles: ["any"]
+      group_profile: "pg-default"
+      action: "allow"
+  - name: create rule for server egress traffic
+    panos_srule:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      rule_name: "server egress"
+      from_zone: ["private"]
+      to_zone: ["public"]
+      source: ["{{ServerIP}}"]
+      source_user: ["any"]
+      destination: ["any"]
+      category: ["any"]
+      application: ["any"]
+      service: ["application-default"]
+      hip_profiles: ["any"]
+      group_profile: "pg-default"
+      action: "allow"      
+  - name: create deny all rule
+    panos_srule:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      rule_name: "deny all"
+      action: "deny"
+      rule_type: "interzone"
+  - name: fetch license
+    panos_lic: ip_address="{{PAVMAWSEIPMgmt}}" password="{{admin_password}}" auth_code="{{auth_code}}"
+    register: result
+    ignore_errors: yes
+  - name: reboot anyway
+    panos_restart:
+      ip_address: "{{PAVMAWSEIPMgmt}}" 
+      password: "{{admin_password}}"
+    when: result|failed      
+  - name: wait for reboot starting (1 minute)
+    pause: seconds=60
+  - name: waiting for reboot
+    panos_check: 
+      ip_address: "{{PAVMAWSEIPMgmt}}" 
+      password: "{{admin_password}}"
+    register: result
+    until: not result|failed
+    retries: 10
+    delay: 30
+  - name: upgrade content
+    panos_content: 
+      ip_address: "{{PAVMAWSEIPMgmt}}" 
+      password: "{{admin_password}}"
+      content_update: yes
+    ignore_errors: yes
+  - name: upgrade anti-virus
+    panos_content: 
+      ip_address: "{{PAVMAWSEIPMgmt}}" 
+      password: "{{admin_password}}"
+      anti_virus_update: yes
+    ignore_errors: yes
+  - name: upgrade pan-db
+    panos_content: 
+      ip_address: "{{PAVMAWSEIPMgmt}}" 
+      password: "{{admin_password}}"
+      url_download_region: europe
+    ignore_errors: yes
+  - name: upgrade wildfire
+    panos_content: 
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      wildfire_update: yes
+    ignore_errors: yes
+
+
