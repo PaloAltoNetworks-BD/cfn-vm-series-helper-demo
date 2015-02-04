@@ -11,7 +11,25 @@
       "MaxLength": "255",
       "AllowedPattern": "[\\x20-\\x7E]*",
       "ConstraintDescription": "can contain only ASCII characters."
-    }
+    },
+    "AccessKey": {
+      "Description": "Access Key",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255"
+    },
+    "SecretAccessKey": {
+      "Description": "Secret Access Key",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255"
+    },
+    "SqsUrl": {
+      "Description": "SQS URL",
+      "Type": "String",
+      "MinLength": "1",
+      "MaxLength": "255"
+    }    
   },
 
   "Mappings": {
@@ -51,10 +69,10 @@
             "    - [pip, install, boto]",
             "    - [git, clone, \"https://github.com/PaloAltoNetworks-BD/cfn-vm-series-helper-demo.git\", /opt/cfn-vm-series-helper-demo]",
             { "Fn::Join": ["", ["    - [export, AWS_REGION=", { "Ref": "AWS::Region" }, "]"]] },
-            { "Fn::Join": ["", ["    - [export, AWS_ACCESS_KEY_ID=", "AKIAIYS5QE4LIY2MABZA", "]"]] },
-            { "Fn::Join": ["", ["    - [export, AWS_SECRET_ACCESS_KEY=", "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", "]"]] },
+            { "Fn::Join": ["", ["    - [export, AWS_ACCESS_KEY_ID=", { "Ref": "AccessKey" }, "]"]] },
+            { "Fn::Join": ["", ["    - [export, AWS_SECRET_ACCESS_KEY=", { "Ref": "SecretAccessKey" }, "]"]] },
             { "Fn::Join": ["", ["    - [export, \"STACKNAME=", { "Ref": "AWS::StackName" }, "\"]"]] },
-            { "Fn::Join": ["", ["    - [export, \"AWS_SQS_URL=", "https://sqs.eu-west-1.amazonaws.com/972719793265/sns-test-VMseriesHelperQueue-6SB52BS8O0IR", "\"]"]] },
+            { "Fn::Join": ["", ["    - [export, \"AWS_SQS_URL=", { "Ref": "SqsUrl" }, "\"]"]] },
             "    - [\"/usr/bin/python /opt/cfn-vm-series-helper-demo/helper.py > /var/log/helper.log 2>&1 &\"]",
 
             "output: {all: '| tee -a /var/log/cloud-config-output.log'}"
