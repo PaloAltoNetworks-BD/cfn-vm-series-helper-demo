@@ -1,0 +1,3 @@
+[submodule "ansible-pan"]
+	path = ansible-pan
+	url = https://github.com/PaloAltoNetworks-BD/ansible-pan.git
