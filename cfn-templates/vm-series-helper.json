@@ -73,7 +73,7 @@
             { "Fn::Join": ["", ["    - [export, AWS_SECRET_ACCESS_KEY=", { "Ref": "SecretAccessKey" }, "]"]] },
             { "Fn::Join": ["", ["    - [export, \"STACKNAME=", { "Ref": "AWS::StackName" }, "\"]"]] },
             { "Fn::Join": ["", ["    - [export, \"AWS_SQS_URL=", { "Ref": "SqsUrl" }, "\"]"]] },
-            "    - [\"/usr/bin/python /opt/cfn-vm-series-helper-demo/helper.py > /var/log/helper.log 2>&1 &\"]",
+            "    - [/opt/cfn-vm-series-helper-demo/helper.sh]",
 
             "output: {all: '| tee -a /var/log/cloud-config-output.log'}"
             ]]}

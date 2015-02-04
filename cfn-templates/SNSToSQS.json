@@ -56,9 +56,19 @@
               "Effect":"Allow",
  	            "Action":[ "sqs:DeleteMessage", "sqs:ReceiveMessage" ],
               "Resource":[ { "Fn::GetAtt" : ["VMseriesHelperQueue", "Arn"]} ]
-            } ]
+            }]
           }
-        } ]
+        },
+        {
+          "PolicyName": "VMseriesHelperKeyPairGroupPolicy",
+          "PolicyDocument": {
+            "Statement":[ {
+              "Effect":"Allow",
+              "Action":[ "ec2:CreateKeyPair" ],
+              "Resource":[ "*" ]          
+            }]
+          }
+        }]
       }
     },
 
