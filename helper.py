@@ -129,7 +129,7 @@ def generate_skey(region, keyname, keyfname):
     mypath = os.path.dirname(os.path.realpath(__file__))
     keypath = os.path.join(mypath, keyfname)
 
-    conn = boto.connect_ec2(region=region)
+    conn = boto.ec2.connect_to_region(region)
     keypair = conn.create_keypair(keyname)
     keypair.save(keypath)
 
