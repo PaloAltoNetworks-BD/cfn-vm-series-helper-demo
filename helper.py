@@ -11,6 +11,7 @@ import ansible.playbook
 import ansible.callbacks
 import boto.sqs
 import boto.sqs.queue
+import boto.ec2
 
 LOG = logging.getLogger(__name__)
 
