@@ -131,7 +131,7 @@ def generate_skey(region, keyname, keyfname):
     keypath = os.path.join(mypath, keyfname)
 
     conn = boto.ec2.connect_to_region(region)
-    keypair = conn.create_keypair(keyname)
+    keypair = conn.create_key_pair(keyname)
     keypair.save(keypath)
 
     return keypath
