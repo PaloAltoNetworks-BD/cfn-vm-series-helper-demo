@@ -192,7 +192,7 @@ def main(args):
     awsregion = os.environ['AWS_REGION']
     sqsurl = os.environ['AWS_SQS_URL']
 
-    stackname = os.environ.get['STACKNAME']
+    stackname = os.environ['STACKNAME']
     keypath = generate_skey(awsregion, stackname, 'pkey.pem')
 
     sqsconn = boto.sqs.connect_to_region(awsregion)
