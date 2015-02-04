@@ -125,7 +125,17 @@ def reply_to_msg(m, success=True, reason="OK", data=None):
 
     return True
 
-def execute_playbook(pbvars):
+def generate_skey(region, keyname, keyfname):
+    mypath = os.path.dirname(os.path.realpath(__file__))
+    keypath = os.path.join(mypath, keyfname)
+
+    conn = boto.connect_ec2(region=region)
+    keypair = conn.create_keypair(keyname)
+    keypair.save(keypath)
+
+    return keypath
+
+def execute_playbook(keypath, pbvars):
     return_data = {}
 
     extra_vars = {}
@@ -146,7 +156,7 @@ def execute_playbook(pbvars):
                 return_data[k] = v
         extra_vars[k] = v
 
-    extra_vars['key_filename'] = os.environ['KEY_FILENAME']
+    extra_vars['key_filename'] = keypath
 
     mypath = os.path.dirname(os.path.realpath(__file__))
     module_path = os.path.join(mypath, 'ansible-pan', 'library')
@@ -182,6 +192,9 @@ def main(args):
     awsregion = os.environ['AWS_REGION']
     sqsurl = os.environ['AWS_SQS_URL']
 
+    stackname = os.environ.get['STACKNAME']
+    keypath = generate_skey(awsregion, stackname, 'pkey.pem')
+
     sqsconn = boto.sqs.connect_to_region(awsregion)
     queue = boto.sqs.queue.Queue(connection=sqsconn, url=sqsurl)
     if queue is None:
@@ -202,7 +215,7 @@ def main(args):
         rt = crmsg.get('RequestType', None)
         if rt == 'Create':
             try:
-                success, reason, data = execute_playbook(crmsg.get('ResourceProperties', {}))
+                success, reason, data = execute_playbook(keypath, crmsg.get('ResourceProperties', {}))
                 LOG.debug("playbook result: %s %s %s", success, reason, data)
             except:
                 LOG.exception("exception in execute_playbook")
