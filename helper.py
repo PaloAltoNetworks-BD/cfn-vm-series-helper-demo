@@ -126,15 +126,14 @@ def reply_to_msg(m, success=True, reason="OK", data=None):
 
     return True
 
-def generate_skey(region, keyname, keyfname):
+def generate_skey(region, keyname):
     mypath = os.path.dirname(os.path.realpath(__file__))
-    keypath = os.path.join(mypath, keyfname)
 
     conn = boto.ec2.connect_to_region(region)
     keypair = conn.create_key_pair(keyname)
-    keypair.save(keypath)
+    keypair.save(mypath)
 
-    return keypath
+    return os.path.join(mypath, keyname+".pem")
 
 def execute_playbook(keypath, pbvars):
     return_data = {}
