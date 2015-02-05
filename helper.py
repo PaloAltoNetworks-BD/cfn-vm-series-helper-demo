@@ -164,7 +164,7 @@ def execute_playbook(keypath, pbvars):
 
     playbook_cb = HelperPlaybookCallbacks()
     runner_cb = HelperRunnerCallbacks()
-    inventory = ansible.inventory.Inventory()
+    inventory = ansible.inventory.Inventory(host_list="localhost,127.0.0.1")
     stats = ansible.callbacks.AggregateStats()
 
     pb = ansible.playbook.PlayBook(
