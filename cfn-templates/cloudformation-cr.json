@@ -76,15 +76,6 @@
     "PAVMAWSAuthCode": {
       "Type": "String",
       "Description" : "AuthCode to apply to the PA-VM-AWS-Instance"
-    },
-
-    "AWSMonitorUserPassword": {
-      "NoEcho": "true",
-      "Type": "String",
-      "Description" : "Password for the AWS monitor user",
-      "MinLength": "1",
-      "MaxLength": "41",
-      "ConstraintDescription" : "password must be between 1 and 41 characters."
     }
   },
 
