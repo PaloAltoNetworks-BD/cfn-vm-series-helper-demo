@@ -1,4 +1,4 @@
-- name: setup protected server stack
+- name: setup VM-Series instance in front of webserver
   hosts: 127.0.0.1
   connection: local
 
@@ -53,6 +53,20 @@
       if_name: "ethernet1/2"
       zone_name: "private"
       create_default_route: "no"
+  - name: create aws monitor
+    panos_awsmonitor:
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      monitor_name: "aws-monitor"
+      vpc_id: "{{VPCId}}"
+      access_key: "{{AWSMonitorUserAccessKey}}",
+      secret_access_key: "{{AWSMonitorUserSecretAccessKey}}"
+      source: "{{AWSMonitorSource}}"
+  - name: create dag
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      password: "{{admin_password}}"
+      dag_name: "privateserver"
+      dag_filter: "'aws-tag.aws:cloudformation:logical-id.ServerInstance' and 'instanceState.running'"
   - name: create bidirectional source nat rule for server
     panos_snat:
       ip_address: "{{PAVMAWSEIPMgmt}}"
@@ -105,7 +119,7 @@
       rule_name: "server egress"
       from_zone: ["private"]
       to_zone: ["public"]
-      source: ["{{ServerIP}}"]
+      source: ["privateserver"]
       source_user: ["any"]
       destination: ["any"]
       category: ["any"]

@@ -143,7 +143,7 @@
             "    - [pip, install, paramiko]",
             "    - [pip, install, boto]",
             "    - [pip, install, pan-python]",
-            "    - [git, clone, --recursive, \"https://github.com/PaloAltoNetworks-BD/cfn-vm-series-helper-demo.git\", /opt/cfn-vm-series-helper-demo]",
+            "    - [git, clone, --recursive, \"-b extreme\", \"https://github.com/PaloAltoNetworks-BD/cfn-vm-series-helper-demo.git\", /opt/cfn-vm-series-helper-demo]",
             { "Fn::Join": ["", ["    - [export, AWS_REGION=", { "Ref": "AWS::Region" }, "]"]] },
             { "Fn::Join": ["", ["    - [export, AWS_ACCESS_KEY_ID=", { "Ref": "VMseriesHelperUserKey" }, "]"]] },
             { "Fn::Join": ["", ["    - [export, AWS_SECRET_ACCESS_KEY=", {"Fn::GetAtt" : ["VMseriesHelperUserKey", "SecretAccessKey"]}, "]"]] },
