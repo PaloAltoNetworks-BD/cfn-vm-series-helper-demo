@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
 
-  "Description": "Install a server instance protected by an instance of PA-VM-AWS. Luigi Mori - lmori@paloaltonetworks.com. TBD: - BlockMapping for  DeleteOnTermination, work on dependencies, customresource",
+  "Description": "Install a server instance protected by an instance of PA-VM-AWS. Luigi Mori - lmori@paloaltonetworks.com. TBD: - BlockMapping for  DeleteOnTermination, work on dependencies",
 
   "Parameters": {
     "PAVMAWSKeyName": {
@@ -426,12 +426,7 @@
     },
 
     "AWSMonitorUser" : {
-     "Type" : "AWS::IAM::User",
-     "Properties" : {
-       "LoginProfile": {
-         "Password": {"Ref" : "AWSMonitorUserPassword"}
-       }
-     }
+     "Type" : "AWS::IAM::User"
     },
 
     "AWSMonitorUserKey" : {
@@ -446,27 +441,12 @@
       "Properties" : {
           "PolicyName" : "AWSMonitoring",
           "PolicyDocument" : {
-            "Version" : "2015-02-05",
+            "Version" : "2012-10-17",
             "Statement": [ {
               "Effect": "Allow",
-              "Action": [
-                "ec2:DescribeInstanceAttribute",
-                "ec2:DescribeInstanceStatus",
-                "ec2:DescribeInstances"
-              ],
-              "Resource": [
-                { "Fn::Join": [":", ["arn", "aws", "ec2", { "Ref": "AWS::Region" }, { "Ref": "AWS::AccountId" }, "instance/*" ]] }
-              ]
-          },
-          {
-              "Effect": "Allow",
-              "Action": [
-                "ec2:DescribeVpcs"
-              ],
-              "Resource": [
-                { "Fn::Join": [":", ["arn", "aws", "ec2", { "Ref": "AWS::Region" }, { "Ref": "AWS::AccountId" }, { "Fn::Join": ["", ["vpc/", {"Ref" : "NewVPC"}]] } ]] }
-              ]
-          } ]
+              "Action": "ec2:Describe*",
+              "Resource": "*"
+            } ]
           },
           "Users" : [ { "Ref" : "AWSMonitorUser" } ]
       }

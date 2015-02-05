@@ -1,4 +1,4 @@
-- name: setup VM-Series instance in front of webserver
+- name: configure VM-Series instance in front of a webserver
   hosts: 127.0.0.1
   connection: local
 
@@ -59,10 +59,11 @@
       password: "{{admin_password}}"
       monitor_name: "aws-monitor"
       vpc_id: "{{VPCId}}"
-      access_key: "{{AWSMonitorUserAccessKey}}",
+      access_key: "{{AWSMonitorUserAccessKey}}"
       secret_access_key: "{{AWSMonitorUserSecretAccessKey}}"
       source: "{{AWSMonitorSource}}"
   - name: create dag
+    panos_dag:
       ip_address: "{{PAVMAWSEIPMgmt}}"
       password: "{{admin_password}}"
       dag_name: "privateserver"
