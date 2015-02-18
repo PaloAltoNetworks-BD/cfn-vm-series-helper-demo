@@ -51,7 +51,7 @@ class WebEvents(object):
         self.j2template = jinja2.Template(tpl)
 
     def _render(self):
-        ts = self.j2template.stream(events=EVENTS)
+        ts = self.j2template.stream(events=self.events)
         f = open(self.target, 'wb+')
         ts.dump(f)
 

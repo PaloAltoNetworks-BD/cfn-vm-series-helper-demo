@@ -19,6 +19,14 @@ span.task-progress {
 	color: #f90;
 }
 
+span.task-failed {
+	color:#c00;
+}
+
+span.task-skipped {
+	color:#777;
+}
+
 .panel-heading {
 	background: #fff !important;
 }
@@ -27,6 +35,7 @@ span.task-progress {
 	background: #eee;
 	font-size: 12px !important;
 	padding: 2px;
+	word-wrap: break-word;
 }
 
 .panel-code code {
