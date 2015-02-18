@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/img/fav32_white.png">
+
+    <title>VM-Series-Helper</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/panw.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">
+            <img src="/img/fav32_white.png"/> VM-Series-Helper
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container main-container">
+      <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            {% for event in events %}
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading{{ loop.index }}">
+                  <h4 class="panel-title">
+                    <a class="collapsed" data-toggle="collapse" href="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                      <span style="font-size: 80%" class="glyphicon glyphicon-chevron-right"></span> {{ event.time }} - {{ event.title }}:
+                    </a>
+                    <span class="task-{{ event.status }}">{% if event.status == 'ok' %}OK{% elif event.status == 'progress' %}IN PROGRESS{% elif event.status == 'ok' %}OK{% else %}ERROR{% endif %}</span>
+                  </h4>
+                </div>
+                <div id="collapse{{ loop.index }}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading{{ loop.index }}">
+                  <div class="panel-body">
+                    {% if event.status == 'progress' %}
+                      <img src="/img/load_big.gif"/>
+                    {% else %}
+                      <div class="panel-code"><code>{{ event.result }}</code></div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+  </body>
+</html>

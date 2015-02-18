@@ -12,8 +12,48 @@ import ansible.callbacks
 import boto.sqs
 import boto.sqs.queue
 import boto.ec2
+import jinja2
+import datetime
 
 LOG = logging.getLogger(__name__)
+EVENTS = None
+
+class WebEvents(object):
+    def __init__(self, template, target):
+        self.target = target
+        self.events = []
+        self._setup_template(template)
+
+    def add_waiting():
+        if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
+            self.events[-1]['status'] = 'ok'
+        self.events.append({ 'time': datetime.datetime.utcnow().isoformat('T'), 'title': 'waiting', 'status': 'progress', 'result': None })
+        self._render()
+
+    def add_pb_event(self, title):
+        if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
+            self.events[-1]['status'] = 'ok'
+        self.events.append({ 'time': datetime.datetime.utcnow().isoformat('T'), 'title': title, 'status': 'progress', 'result': None })
+        self._render()
+
+    def set_result(self, status, result):
+        if len(self.events) == 0:
+            LOG.error("no event for set_result")
+            return
+        self.events[-1]['status'] = status
+        self.events[-1]['result'] = result
+        self._render()
+
+    def _setup_template(self, template):
+        f = open(template, 'r')
+        tpl = f.read()
+        f.close()
+        self.j2template = jinja2.Template(tpl)
+
+    def _render(self):
+        ts = self.j2template.stream(events=EVENTS)
+        f = open(self.target, 'wb+')
+        ts.dump(f)
 
 class HelperPlaybookCallbacks(object):
     def __init__(self):
@@ -32,6 +72,7 @@ class HelperPlaybookCallbacks(object):
         LOG.critical("on_no_hosts_remaining")
 
     def on_task_start(self, name, is_conditional):
+        EVENTS.add_pb_event(name)
         LOG.info("TASK: [%s] - is_conditional: %s", name, is_conditional)
 
     def on_vars_prompt(self, varname, private=True, prompt=None, encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
@@ -39,6 +80,7 @@ class HelperPlaybookCallbacks(object):
         return None
 
     def on_setup(self):
+        EVENTS.add_pb_event('setup')
         LOG.debug("on_setup")
 
     def on_import_for_host(self, host, imported_file):
@@ -48,6 +90,7 @@ class HelperPlaybookCallbacks(object):
         LOG.debug("on_not_import_for_host")
 
     def on_play_start(self, name):
+        EVENTS.add_pb_event('start playbook %s'%name)
         LOG.info("PLAY[%s]", name)
 
     def on_stats(self, stats):
@@ -58,14 +101,17 @@ class HelperRunnerCallbacks(ansible.callbacks.DefaultRunnerCallbacks):
         pass
 
     def on_failed(self, host, res, ignore_errors):
+        EVENTS.set_result('failed', json.dumps(res))
         LOG.error("FAILED: %s %s %s", host, json.dumps(res), ignore_errors)
         super(HelperRunnerCallbacks, self).on_failed(host, res, ignore_errors)
 
     def on_ok(self, host, res):
+        EVENTS.set_result('ok', json.dumps(res))
         LOG.info("OK: %s %s", host, json.dumps(res))
         super(HelperRunnerCallbacks, self).on_ok(host, res)
 
     def on_skipped(self, host, item=None):
+        EVENTS.set_result('skipped', json.dumps(res))
         LOG.info("SKIPPED: %s %s", host, item)
         super(HelperRunnerCallbacks, self).on_skipped(host, item)
 
@@ -189,6 +235,8 @@ def execute_playbook(keypath, pbvars):
     return True, "okey dokey", return_data
 
 def main(args):
+    global EVENTS
+
     awsregion = os.environ['AWS_REGION']
     sqsurl = os.environ['AWS_SQS_URL']
 
@@ -200,6 +248,11 @@ def main(args):
     if queue is None:
         LOG.critical("No queue found")
         sys.exit(1)
+
+    mypath = os.path.dirname(os.path.realpath(__file__))
+    tpl = os.path.join(mypath, 'www', 'index.j2')
+    target = os.path.join(mypath, 'www', 'index.html')
+    EVENTS = WebEvents(tpl, target)
 
     while True:
         msg = queue.read(30)
