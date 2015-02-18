@@ -5,7 +5,7 @@
 
   "Parameters" : {
     "KeyName": {
-      "Description": "Name of an existing Key Pair for the VM-Series Helper instance",
+      "Description": "Name of an existing Key Pair, it will be used to access VM-Series Helper instance",
       "Type": "String",
       "MinLength": "1",
       "MaxLength": "255",
