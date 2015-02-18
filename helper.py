@@ -24,7 +24,7 @@ class WebEvents(object):
         self.events = []
         self._setup_template(template)
 
-    def add_waiting():
+    def add_waiting(self):
         if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
             self.events[-1]['status'] = 'ok'
         self.events.append({ 'time': datetime.datetime.utcnow().isoformat('T'), 'title': 'waiting', 'status': 'progress', 'result': None })
@@ -254,6 +254,7 @@ def main(args):
     target = os.path.join(mypath, 'www', 'index.html')
     EVENTS = WebEvents(tpl, target)
 
+    EVENTS.add_waiting()
     while True:
         msg = queue.read(30)
         if msg == None:
@@ -275,6 +276,7 @@ def main(args):
                 reply_to_msg(crmsg, success=False, reason="Exception executing playbook")
             else:
                 reply_to_msg(crmsg, success=success, reason=reason, data=data)
+            EVENTS.add_waiting()
         elif rt == 'Delete':
             reply_to_msg(crmsg, success=True, reason="OK")
         else:

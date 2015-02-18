@@ -107,6 +107,7 @@
         "Queues" : [{"Ref" : "VMseriesHelperQueue"}]
       }
     },
+
     "VMSeriesHelperInstance": {
       "Type" : "AWS::EC2::Instance",
       "Properties" : {
@@ -131,10 +132,6 @@
             "    - [pip, install, paramiko]",
             "    - [pip, install, boto]",
             "    - [pip, install, pan-python]",
-            "    - [rm, /etc/nginx/sites-enabled/default]",
-            "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh, /etc/nginx/sites-enabled/]",
-            "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh-htpasswd, /etc/nginx/]",
-            "    - [service, nginx, restart]",
             "    - [git, clone, -b, vmsh-webui, --recursive, \"https://github.com/PaloAltoNetworks-BD/cfn-vm-series-helper-demo.git\", /opt/cfn-vm-series-helper-demo]",
             { "Fn::Join": ["", ["    - [export, AWS_REGION=", { "Ref": "AWS::Region" }, "]"]] },
             { "Fn::Join": ["", ["    - [export, AWS_ACCESS_KEY_ID=", { "Ref": "VMseriesHelperUserKey" }, "]"]] },
@@ -142,6 +139,10 @@
             { "Fn::Join": ["", ["    - [export, \"STACKNAME=", { "Ref": "AWS::StackName" }, "\"]"]] },
             { "Fn::Join": ["", ["    - [export, \"AWS_SQS_URL=", { "Ref" : "VMseriesHelperQueue" }, "\"]"]] },
             "    - [/opt/cfn-vm-series-helper-demo/helper.sh]",
+            "    - [rm, /etc/nginx/sites-enabled/default]",
+            "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh, /etc/nginx/sites-enabled/]",
+            "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh-htpasswd, /etc/nginx/]",
+            "    - [service, nginx, restart]",
 
             "output: {all: '| tee -a /var/log/cloud-config-output.log'}"
             ]]}
