@@ -1,3 +1,3 @@
 (function(d,w) {
-	setTimeout(function() { window.location.reload(); }, 10000);	
+	setTimeout(function() { window.location.reload(); }, 30000);	
 })(document, window);

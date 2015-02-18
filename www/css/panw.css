@@ -41,3 +41,7 @@ span.task-skipped {
 .panel-code code {
 	color: #222;
 }
+
+span.event-time {
+	color: #aaa;
+}

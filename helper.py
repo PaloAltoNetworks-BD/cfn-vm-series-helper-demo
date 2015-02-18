@@ -27,13 +27,13 @@ class WebEvents(object):
     def add_waiting(self):
         if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
             self.events[-1]['status'] = 'ok'
-        self.events.append({ 'time': datetime.datetime.utcnow().isoformat('T'), 'title': 'waiting', 'status': 'progress', 'result': None })
+        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S'), 'title': 'waiting', 'status': 'progress', 'result': None })
         self._render()
 
     def add_pb_event(self, title):
         if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
             self.events[-1]['status'] = 'ok'
-        self.events.append({ 'time': datetime.datetime.utcnow().isoformat('T'), 'title': title, 'status': 'progress', 'result': None })
+        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S'), 'title': title, 'status': 'progress', 'result': None })
         self._render()
 
     def set_result(self, status, result):
@@ -90,7 +90,7 @@ class HelperPlaybookCallbacks(object):
         LOG.debug("on_not_import_for_host")
 
     def on_play_start(self, name):
-        EVENTS.add_pb_event('start playbook %s'%name)
+        EVENTS.add_pb_event('starting playbook {%s}'%name)
         LOG.info("PLAY[%s]", name)
 
     def on_stats(self, stats):
