@@ -111,7 +111,7 @@ class HelperRunnerCallbacks(ansible.callbacks.DefaultRunnerCallbacks):
         super(HelperRunnerCallbacks, self).on_ok(host, res)
 
     def on_skipped(self, host, item=None):
-        EVENTS.set_result('skipped', json.dumps(res))
+        EVENTS.set_result('skipped', 'skipped '+str(item))
         LOG.info("SKIPPED: %s %s", host, item)
         super(HelperRunnerCallbacks, self).on_skipped(host, item)
 
