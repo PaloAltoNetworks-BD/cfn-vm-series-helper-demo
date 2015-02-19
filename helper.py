@@ -27,13 +27,13 @@ class WebEvents(object):
     def add_waiting(self):
         if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
             self.events[-1]['status'] = 'ok'
-        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S'), 'title': 'waiting', 'status': 'progress', 'result': None })
+        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 'title': 'waiting', 'status': 'progress', 'result': None })
         self._render()
 
     def add_pb_event(self, title):
         if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
             self.events[-1]['status'] = 'ok'
-        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H-%M-%S'), 'title': title, 'status': 'progress', 'result': None })
+        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 'title': title, 'status': 'progress', 'result': None })
         self._render()
 
     def set_result(self, status, result):
