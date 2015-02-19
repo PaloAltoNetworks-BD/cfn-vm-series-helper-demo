@@ -38,7 +38,7 @@
                     <a class="collapsed" data-toggle="collapse" href="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
                       <span style="font-size: 80%" class="glyphicon glyphicon-chevron-right"></span> <span class="event-time">{{ event.time }} -</span> {{ event.title }}:
                     </a>
-                    <span class="task-{{ event.status }}">{% if event.status == 'ok' %}OK{% elif event.status == 'progress' %}IN PROGRESS{% elif event.status == 'failed' %}FAIL{% else %}ERROR{% endif %}</span>
+                    <span class="task-{{ event.status }}">{% if event.status == 'ok' %}OK{% elif event.status == 'progress' %}IN PROGRESS{% elif event.status == 'failed' %}FAIL{% elif event.status == 'skipped' %}SKIPPED{% else %}ERROR{% endif %}</span>
                   </h4>
                 </div>
                 <div id="collapse{{ loop.index }}" class="panel-collapse collapse {% if event.status == 'progress' %}in{% endif %}" role="tabpanel" aria-labelledby="heading{{ loop.index }}">
