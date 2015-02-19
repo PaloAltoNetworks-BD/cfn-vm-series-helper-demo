@@ -41,7 +41,7 @@
                     <span class="task-{{ event.status }}">{% if event.status == 'ok' %}OK{% elif event.status == 'progress' %}IN PROGRESS{% elif event.status == 'failed' %}FAIL{% else %}ERROR{% endif %}</span>
                   </h4>
                 </div>
-                <div id="collapse{{ loop.index }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ loop.index }}">
+                <div id="collapse{{ loop.index }}" class="panel-collapse collapse {% if event.status == 'progress' %}in{% endif %}" role="tabpanel" aria-labelledby="heading{{ loop.index }}">
                   <div class="panel-body">
                     {% if event.status == 'progress' %}
                       <img src="/img/load_big.gif"/>
