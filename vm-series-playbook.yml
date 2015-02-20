@@ -81,13 +81,6 @@
       source: "{{ServerIP}}"
       destination: "any"
       service: "any"
-  - name: create custom app for EIP PublicDNS
-    panos_cstapphost:
-      ip_address: "{{PAVMAWSEIPMgmt}}"
-      password: "{{admin_password}}"
-      app_name: "newwebapp"
-      host_regex: "{{PAVMAWSEIPPublicDNS}}"
-      convert_hostname: "true"
   - name: create defult security profile group
     panos_pg:
       ip_address: "{{PAVMAWSEIPMgmt}}"
@@ -108,7 +101,7 @@
       source_user: ["any"]
       destination: ["{{PAVMAWSPublicIP}}"]
       category: ["any"]
-      application: ["ssh", "newwebapp", "web-browsing"]
+      application: ["ssh", "mysql", "ping"]
       service: ["application-default"]
       hip_profiles: ["any"]
       group_profile: "pg-default"

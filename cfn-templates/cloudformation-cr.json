@@ -91,15 +91,8 @@
       "sa-east-1"      : { "release610": "ami-c7e255da" }
     },
 
-    "UbuntuAWSRegionMap" : {
-      "us-east-1"      : { "AMI": "ami-88562de0" },
-      "us-west-2"      : { "AMI": "ami-3bebb50b" },
-      "us-west-1"      : { "AMI": "ami-4e120b0b" },
-      "eu-west-1"      : { "AMI": "ami-314ecc46" },
-      "ap-southeast-1" : { "AMI": "ami-da381388" },
-      "ap-northeast-1" : { "AMI": "ami-0eb6aa0f" },
-      "ap-southeast-2" : { "AMI": "ami-bbeb9e81" },
-      "sa-east-1"      : { "AMI": "ami-79f54964" }
+    "SQLSESummitRegionMap" : {
+      "us-west-2"      : { "AMI": "ami-3bebb50b" }      
     }
   },
 
@@ -364,9 +357,15 @@
              },
              {
                 "IpProtocol" : "tcp",
-                "FromPort" : "80",
-                "ToPort" : "80",
+                "FromPort" : "3306",
+                "ToPort" : "3306",
                 "CidrIp" : "0.0.0.0/0"             
+              },
+              { 
+                "IpProtocol" : "icmp", 
+                "FromPort" : "8", 
+                "ToPort" : "-1", 
+                "CidrIp" : "0.0.0.0/0"
               }],
           "SecurityGroupEgress" : [{
              "IpProtocol" : "-1",
@@ -383,7 +382,7 @@
       "Properties" : {
           "AvailabilityZone": { "Fn::GetAtt": [ "NewPrivateSubnet", "AvailabilityZone" ] },
           "DisableApiTermination" : "false",
-          "ImageId" : { "Fn::FindInMap" : [ "UbuntuAWSRegionMap", { "Ref" : "AWS::Region" }, "AMI" ] },
+          "ImageId" : { "Fn::FindInMap" : [ "SQLSESummitRegionMap", { "Ref" : "AWS::Region" }, "AMI" ] },
           "InstanceType" : "t1.micro",
           "KeyName" : { "Ref": "ServerKeyName" },
           "NetworkInterfaces" : [ {
@@ -403,13 +402,7 @@
               { "Fn::GetAtt": [ "PAVMAWSPrivateInterface", "PrimaryPrivateIpAddress"] }, 
               "'\" >> /etc/dhcp/dhclient-enter-hooks.d/aws-default-route\n",
             "ifdown eth0\n",
-            "ifup eth0\n",
-
-            "while ! ping -c1 www.paloaltonetworks.com &>/dev/null; do :; done\n",
-
-            "apt-get update\n",
-            "apt-get upgrade -y\n",
-            "apt-get install apache2 -y\n"
+            "ifup eth0\n"
             ]]}
           }
       },
