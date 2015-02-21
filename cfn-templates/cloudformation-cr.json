@@ -453,7 +453,8 @@
           "AWSMonitorUserSecretAccessKey": { "Fn::GetAtt": ["AWSMonitorUserKey", "SecretAccessKey"] },
           "AWSMonitorSource": { "Fn::Join": [".", ["ec2", { "Ref": "AWS::Region" }, "amazonaws", "com" ]]},
           "VPCId": {"Ref" : "NewVPC"},
-          "IgnorePlaybookFailure": "yes"
+          "IgnorePlaybookFailure": "yes",
+          "SQLServerAMIID": { "Fn::FindInMap" : [ "SQLSESummitRegionMap", { "Ref" : "AWS::Region" }, "AMI" ] }
        },
        "DependsOn": ["PAVMAWSEIPPublicAssociation", "AWSMonitorUserKey" ]
     }

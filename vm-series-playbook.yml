@@ -1,4 +1,4 @@
-- name: configure VM-Series instance in front of a webserver
+- name: configure VM-Series instance in front of a MySQL Server
   hosts: 127.0.0.1
   connection: local
 
@@ -53,6 +53,12 @@
       if_name: "ethernet1/2"
       zone_name: "private"
       create_default_route: "no"
+  - name: configure tunnel.1
+    panos_tunnelif:
+      password: "{{admin_password}}"
+      ip_address: "{{PAVMAWSEIPMgmt}}"
+      tunnel_unit: 1
+      zone_name: "vpn-dc"
   - name: create aws monitor
     panos_awsmonitor:
       ip_address: "{{PAVMAWSEIPMgmt}}"
@@ -66,21 +72,8 @@
     panos_dag:
       ip_address: "{{PAVMAWSEIPMgmt}}"
       password: "{{admin_password}}"
-      dag_name: "privateserver"
-      dag_filter: "'aws-tag.aws:cloudformation:logical-id.ServerInstance' and 'instanceState.running'"
-  - name: create bidirectional source nat rule for server
-    panos_snat:
-      ip_address: "{{PAVMAWSEIPMgmt}}"
-      password: "{{admin_password}}"
-      rule_name: "snat"
-      bidirectional: "true"
-      snat_type: "static-ip"
-      translated_address: "{{PAVMAWSPublicIP}}"
-      from_zone: "private"
-      to_zone: "public"
-      source: "{{ServerIP}}"
-      destination: "any"
-      service: "any"
+      dag_name: "sqlservers"
+      dag_filter: "'imageid.{{SQLServerAMIID}}' and 'instanceState.running'"
   - name: create defult security profile group
     panos_pg:
       ip_address: "{{PAVMAWSEIPMgmt}}"
@@ -95,29 +88,13 @@
       ip_address: "{{PAVMAWSEIPMgmt}}"
       password: "{{admin_password}}"
       rule_name: "server permit"
-      from_zone: ["public"]
+      from_zone: ["vpn-dc"]
       to_zone: ["private"]
       source: ["any"]
       source_user: ["any"]
-      destination: ["{{PAVMAWSPublicIP}}"]
+      destination: ["sqlservers"]
       category: ["any"]
       application: ["ssh", "mysql", "ping"]
-      service: ["application-default"]
-      hip_profiles: ["any"]
-      group_profile: "pg-default"
-      action: "allow"
-  - name: create rule for server egress traffic
-    panos_srule:
-      ip_address: "{{PAVMAWSEIPMgmt}}"
-      password: "{{admin_password}}"
-      rule_name: "server egress"
-      from_zone: ["private"]
-      to_zone: ["public"]
-      source: ["privateserver"]
-      source_user: ["any"]
-      destination: ["any"]
-      category: ["any"]
-      application: ["any"]
       service: ["application-default"]
       hip_profiles: ["any"]
       group_profile: "pg-default"
