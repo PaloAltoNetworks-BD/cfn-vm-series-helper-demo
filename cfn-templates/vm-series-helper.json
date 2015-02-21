@@ -120,22 +120,22 @@
 
     "VMSeriesHelperInstance": {
       "Type" : "AWS::EC2::Instance",
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT5M"
+        }
+      },
       "Properties" : {
           "DisableApiTermination" : "false",
           "ImageId" : { "Fn::FindInMap" : [ "UbuntuAWSRegionMap", { "Ref" : "AWS::Region" }, "AMI" ] },
           "InstanceType" : "t1.micro",
           "KeyName" : { "Ref": "KeyName" },
           "SecurityGroups": [ {"Ref": "SecurityGroup"} ],
-          "CreationPolicy": {
-            "ResourceSignal": {
-              "Timeout": "PT10M"
-            }
-          },
           "UserData" : { "Fn::Base64" : { "Fn::Join" : ["\n", [
             "#cloud-config",
 
-            "package_update: false",
-            "package_upgrade: false",
+            "apt_update: false",
+            "apt_upgrade: false",
 
             "packages:",
             "    - nginx",
@@ -159,9 +159,8 @@
             "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh, /etc/nginx/sites-enabled/]",
             "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh-htpasswd, /etc/nginx/]",
             "    - [service, nginx, restart]",
-            "    - [pip, install, \"https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\"",
-            { "Fn::Join": ["", ["    - [cfn-init, --region, ", { "Ref" : "AWS::Region" }, ", -s, ", { "Ref" : "AWS::StackName" }, ", -r, VMSeriesHelperInstance"]] },
-            { "Fn::Join": ["", ["    - [cfn-signal, -e, 0, --stack, ", { "Ref" : "AWS::StackName" }, ", --resource, VMSeriesHelperInstance"]] },
+            "    - [pip, install, \"https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\"]",
+            { "Fn::Join": ["", ["    - [cfn-signal, -e 0, --stack, ", { "Ref" : "AWS::StackName" }, ", --region, ", { "Ref" : "AWS::Region" },", --resource, VMSeriesHelperInstance]"]] },
 
             "output: {all: '| tee -a /var/log/cloud-config-output.log'}"
             ]]}
