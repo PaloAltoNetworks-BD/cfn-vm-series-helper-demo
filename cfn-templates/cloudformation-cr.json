@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
 
-  "Description": "Install a SQL Server instance behind a PA-VM-AWS, demo for SESummit 2015",
+  "Description": "Install a SQL Server instance protected by an instance of PA-VM-AWS. SESummit 2015",
 
   "Parameters": {
     "PAVMAWSKeyName": {
