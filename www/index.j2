@@ -46,7 +46,7 @@
                   <col width="100%"/>
                   <tbody>
                     {% for req in requests %}
-                    <tr class="request" data-stack="{{ loop.index }}">
+                    <tr id="request-{{ loop.index }}" class="request" data-stack="{{ loop.index }}">
                       <td><span style="font-size: 80%" class="glyphicon glyphicon-chevron-right"></span></td>
                       <td><span class="event-time">{{ req.time }}</span></td>
                       <td>handling request {{ req.requestid }} - <span class="task-{{ req.status }}">{% if req.status == 'ok' %}OK{% elif req.status == 'progress' %}IN PROGRESS{% elif req.status == 'failed' %}FAIL{% else %}ERROR{% endif %}</span></td>

@@ -5,6 +5,8 @@
 			var hash = w.location.hash;
 			if(hash) {
 				$("#events-stack-"+hash.substr(1)).show();
+				$("tr.reqselected").removeClass('reqselected');
+				$("#request-"+hash.substr(1)).addClass('reqselected');
 			}
 		};
 

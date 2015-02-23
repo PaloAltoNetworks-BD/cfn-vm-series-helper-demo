@@ -19,6 +19,7 @@ div.table-overflow {
 
 table.vmsh {
 	margin-bottom: 0;
+	table-layout: fixed;
 }
 
 table.vmsh td {
@@ -29,9 +30,13 @@ table.vmsh td {
 	white-space: nowrap;
 }
 
-table.vmsh tr:hover {
+tr.event-header:hover {
 	text-decoration: underline;
 	cursor: pointer;
+}
+
+tr.reqselected {
+	background-color: rgb(230, 233, 217);
 }
 
 span.task-ok {
@@ -59,6 +64,7 @@ span.task-skipped {
 	font-size: 12px !important;
 	padding: 2px;
 	word-wrap: break-word;
+	white-space: normal !important;
 }
 
 .panel-code code {
