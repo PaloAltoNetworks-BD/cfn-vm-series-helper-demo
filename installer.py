@@ -15,7 +15,7 @@ env "AWS_SQS_URL=%(awssqsurl)s"
 
 respawn
 
-exec python %(helper)s > /var/log/helper.log 2>&1
+exec python %(helper)s >> /var/log/helper.log 2>&1
 """
 
 def main(args):

@@ -27,11 +27,11 @@ class WebUI(object):
         self.status = None
         self._setup_template(template)
 
-    def set_status(msg):
+    def set_status(self, msg):
         self.status = msg
         self._render()
 
-    def waiting():
+    def waiting(self):
         self.set_status("Waiting for requests")
 
     def _get_current_request(self):
@@ -40,7 +40,7 @@ class WebUI(object):
         return self.requests[-1]
 
     def add_request(self, requestid):
-        self.set_status("Handling request %s", requestid)
+        self.set_status("Handling request %s"%requestid)
 
         creq = self._get_current_request()
         if creq is not None and creq['status'] == 'progress':
@@ -91,6 +91,7 @@ class WebUI(object):
             LOG.error("No request for result")
             return
 
+        events = creq['events']
         if len(events) == 0:
             LOG.error("no event for set_result")
             return
@@ -127,7 +128,7 @@ class HelperPlaybookCallbacks(object):
         LOG.critical("on_no_hosts_remaining")
 
     def on_task_start(self, name, is_conditional):
-        EVENTS.add_pb_event(name)
+        WEBUI.add_pb_event(name)
         LOG.info("TASK: [%s] - is_conditional: %s", name, is_conditional)
 
     def on_vars_prompt(self, varname, private=True, prompt=None, encrypt=None, confirm=False, salt_size=None, salt=None, default=None):
@@ -135,7 +136,7 @@ class HelperPlaybookCallbacks(object):
         return None
 
     def on_setup(self):
-        EVENTS.add_pb_event('setup')
+        WEBUI.add_pb_event('setup')
         LOG.debug("on_setup")
 
     def on_import_for_host(self, host, imported_file):
@@ -145,7 +146,7 @@ class HelperPlaybookCallbacks(object):
         LOG.debug("on_not_import_for_host")
 
     def on_play_start(self, name):
-        EVENTS.add_pb_event('starting playbook {%s}'%name)
+        WEBUI.add_pb_event('starting playbook {%s}'%name)
         LOG.info("PLAY[%s]", name)
 
     def on_stats(self, stats):
@@ -156,17 +157,17 @@ class HelperRunnerCallbacks(ansible.callbacks.DefaultRunnerCallbacks):
         pass
 
     def on_failed(self, host, res, ignore_errors):
-        EVENTS.set_result('failed', json.dumps(res))
+        WEBUI.set_result('failed', json.dumps(res))
         LOG.error("FAILED: %s %s %s", host, json.dumps(res), ignore_errors)
         super(HelperRunnerCallbacks, self).on_failed(host, res, ignore_errors)
 
     def on_ok(self, host, res):
-        EVENTS.set_result('ok', json.dumps(res))
+        WEBUI.set_result('ok', json.dumps(res))
         LOG.info("OK: %s %s", host, json.dumps(res))
         super(HelperRunnerCallbacks, self).on_ok(host, res)
 
     def on_skipped(self, host, item=None):
-        EVENTS.set_result('skipped', 'skipped '+str(item))
+        WEBUI.set_result('skipped', 'skipped '+str(item))
         LOG.info("SKIPPED: %s %s", host, item)
         super(HelperRunnerCallbacks, self).on_skipped(host, item)
 
@@ -229,12 +230,21 @@ def reply_to_msg(m, success=True, reason="OK", data=None):
 
 def generate_skey(region, keyname):
     mypath = os.path.dirname(os.path.realpath(__file__))
+    keyfile = os.path.join(mypath, keyname+".pem")
+    try:
+        os.stat(keyfile)
+    except:
+        pass
+    else:
+        LOG.debug("key file %s already exists", keyfile)
+        return keyfile
+
 
     conn = boto.ec2.connect_to_region(region)
     keypair = conn.create_key_pair(keyname)
     keypair.save(mypath)
 
-    return os.path.join(mypath, keyname+".pem")
+    return keyfile
 
 def retrieve_playbook(pburl, dstpath):
     LOG.info("retrieving playbook from %s", pburl)
@@ -295,7 +305,7 @@ def execute_playbook(keypath, pbvars):
     pb.run()
 
     if ignorerrors == 'yes':
-        return True, "okey dokey", return_data
+        return True, "Errors ignored", return_data
 
     if len(pb.stats.dark) != 0:
         return False, "Ansible: Unreachable", None
