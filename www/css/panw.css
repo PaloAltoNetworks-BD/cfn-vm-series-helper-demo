@@ -11,6 +11,29 @@ div.main-container {
 	top: -5px;
 }
 
+div.table-overflow {
+	overflow: auto;
+	border-width: 1px !important;
+	border-color: rgb(221, 221, 221);
+}
+
+table.vmsh {
+	margin-bottom: 0;
+}
+
+table.vmsh td {
+	border-top: none !important;
+	padding: 2px !important;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+table.vmsh tr:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
 span.task-ok {
 	color: #558a05;
 }

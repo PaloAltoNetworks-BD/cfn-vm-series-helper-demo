@@ -18,32 +18,85 @@ import tempfile
 import shutil
 
 LOG = logging.getLogger(__name__)
-EVENTS = None
+WEBUI = None
 
-class WebEvents(object):
+class WebUI(object):
     def __init__(self, template, target):
         self.target = target
-        self.events = []
+        self.requests = []
+        self.status = None
         self._setup_template(template)
 
-    def add_waiting(self):
-        if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
-            self.events[-1]['status'] = 'ok'
-        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 'title': 'waiting', 'status': 'progress', 'result': None })
+    def set_status(msg):
+        self.status = msg
         self._render()
 
+    def waiting():
+        self.set_status("Waiting for requests")
+
+    def _get_current_request(self):
+        if len(self.requests) == 0:
+            return None
+        return self.requests[-1]
+
+    def add_request(self, requestid):
+        self.set_status("Handling request %s", requestid)
+
+        creq = self._get_current_request()
+        if creq is not None and creq['status'] == 'progress':
+            self.set_request_result(False, "No result set for this request")
+
+        self.requests.append({
+            'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+            'requestid': requestid,
+            'events': [],
+            'status': 'progress',
+            'reason': None,
+            'data': None
+        })
+
+    def set_request_result(self, success, reason, data=None):
+        creq = self._get_current_request()
+        if creq is None:
+            LOG.error("No req for result")
+            return
+
+        if success:
+            creq['status'] = 'ok'
+        else:
+            creq['status'] = 'failed'
+        creq['reason'] = reason
+        creq['data'] = data
+
     def add_pb_event(self, title):
-        if len(self.events) > 0 and self.events[-1]['status'] == 'progress':
-            self.events[-1]['status'] = 'ok'
-        self.events.append({ 'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 'title': title, 'status': 'progress', 'result': None })
+        creq = self._get_current_request()
+        if creq is None:
+            LOG.error("No request for pb event")
+            return
+
+        events = creq['events']
+        if len(events) > 0 and events[-1]['status'] == 'progress':
+            events[-1]['status'] = 'ok'
+        events.append({ 
+            'time': datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), 
+            'title': title, 
+            'status': 'progress', 
+            'result': None 
+        })
         self._render()
 
     def set_result(self, status, result):
-        if len(self.events) == 0:
+        creq = self._get_current_request()
+        if creq is None:
+            LOG.error("No request for result")
+            return
+
+        if len(events) == 0:
             LOG.error("no event for set_result")
             return
-        self.events[-1]['status'] = status
-        self.events[-1]['result'] = result
+
+        events[-1]['status'] = status
+        events[-1]['result'] = result
         self._render()
 
     def _setup_template(self, template):
@@ -53,7 +106,7 @@ class WebEvents(object):
         self.j2template = jinja2.Template(tpl)
 
     def _render(self):
-        ts = self.j2template.stream(events=self.events)
+        ts = self.j2template.stream(status=self.status, requests=self.requests)
         f = open(self.target, 'wb+')
         ts.dump(f)
 
@@ -252,7 +305,7 @@ def execute_playbook(keypath, pbvars):
     return True, "okey dokey", return_data
 
 def main(args):
-    global EVENTS
+    global WEBUI
 
     awsregion = os.environ['AWS_REGION']
     sqsurl = os.environ['AWS_SQS_URL']
@@ -269,9 +322,10 @@ def main(args):
     mypath = os.path.dirname(os.path.realpath(__file__))
     tpl = os.path.join(mypath, 'www', 'index.j2')
     target = os.path.join(mypath, 'www', 'index.html')
-    EVENTS = WebEvents(tpl, target)
+    WEBUI = WebUI(tpl, target)
 
-    EVENTS.add_waiting()
+    WEBUI.waiting()
+    
     while True:
         msg = queue.read(30)
         if msg == None:
@@ -285,20 +339,24 @@ def main(args):
 
         rt = crmsg.get('RequestType', None)
         if rt == 'Create':
+            WEBUI.add_request(crmsg.get('RequestId'))
             try:
                 success, reason, data = execute_playbook(keypath, crmsg.get('ResourceProperties', {}))
                 LOG.debug("playbook result: %s %s %s", success, reason, data)
             except:
                 LOG.exception("exception in execute_playbook")
                 reply_to_msg(crmsg, success=False, reason="Exception executing playbook")
+                WEBUI.set_request_result(False, "Exception executing playbook")
             else:
                 reply_to_msg(crmsg, success=success, reason=reason, data=data)
-            EVENTS.add_waiting()
+                WEBUI.set_request_result(success, reason, data)
         elif rt == 'Delete':
             reply_to_msg(crmsg, success=True, reason="OK")
         else:
             LOG.warning("Unhandled RequestType %s", rt)
             reply_to_msg(crmsg, succces=True, reason="OK")
+
+        WEBUI.waiting()
 
         queue.delete_message(msg)
 

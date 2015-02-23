@@ -29,31 +29,71 @@
 
     <div class="container main-container">
       <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-          <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            {% for event in events %}
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="heading{{ loop.index }}">
-                  <h4 class="panel-title">
-                    <a class="collapsed" data-toggle="collapse" href="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
-                      <span style="font-size: 80%" class="glyphicon glyphicon-chevron-right"></span> <span class="event-time">{{ event.time }} -</span> {{ event.title }}:
-                    </a>
-                    <span class="task-{{ event.status }}">{% if event.status == 'ok' %}OK{% elif event.status == 'progress' %}IN PROGRESS{% elif event.status == 'failed' %}FAIL{% elif event.status == 'skipped' %}SKIPPED{% else %}ERROR{% endif %}</span>
-                  </h4>
-                </div>
-                <div id="collapse{{ loop.index }}" class="panel-collapse collapse {% if event.status == 'progress' %}in{% endif %}" role="tabpanel" aria-labelledby="heading{{ loop.index }}">
-                  <div class="panel-body">
-                    {% if event.status == 'progress' %}
-                      <img src="/img/load_big.gif"/>
-                    {% else %}
-                      <div class="panel-code"><code>{{ event.result }}</code></div>
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
+        <div class="col-md-12">
+          <h5>STATUS: {% status %} {%if status.startswith('Waiting') %}<img style="margin-left: 5px;" src="/img/load_big.gif"/>{% endif %}</h5>
         </div>
       </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <h5 style="padding-bottom: 2px" class="panel-title">REQUESTS</h5>
+              <div style="height: 110px !important;" class="table-overflow">
+                <table class="table table-condensed vmsh">
+                  <col width="32px"/>
+                  <col width="150px"/>
+                  <col width="auto"/>
+                  <tbody>
+                    {% for req in requests %}
+                    <tr class="request" data-stack="{{ loop.index }}">
+                      <td><span style="font-size: 80%" class="glyphicon glyphicon-chevron-right"></span></td>
+                      <td><span class="event-time">{{ req.time }}</span></td>
+                      <td>handling request {{ req.requestid }} - <span class="task-{{ req.status }}">{% if req.status == 'ok' %}OK{% elif req.status == 'progress' %}IN PROGRESS{% elif req.status == 'failed' %}FAIL{% else %}ERROR{% endif %}</span></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% for req in requests %}
+      <div class="row events" id="events-stack-{{ loop.index }}">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <h5 style="padding-bottom: 2px" class="panel-title">EVENTS FOR REQUEST {{ req.requestid|upper }}</h5>
+              <div style="height: 250px !important;" class="table-overflow">
+                <table class="table table-condensed vmsh">
+                  <col width="32px"/>
+                  <col width="150px"/>
+                  <col width="auto"/>
+                  <tbody>
+                    {% for evt in req.events %}
+                    <tr class="event-header">
+                      <td><span style="font-size: 80%" class="glyphicon glyphicon-chevron-right"></span></td>
+                      <td><span class="event-time">{{ evt.time }}</span></td>
+                      <td>{{ evt.title }} - <span class="task-{{ event.status }}">{% if evt.status == 'ok' %}OK{% elif evt.status == 'progress' %}IN PROGRESS{% elif evt.status == 'failed' %}FAIL{% elif evt.status == 'skipped' %}SKIPPED{% else %}ERROR{% endif %}</span></td>
+                    </tr>
+                    <tr class="collapse">
+                      <td></td>
+                      <td>
+                      {% if evt.status == 'progress' %}
+                        <td colspan="2"><img src="/img/load_big.gif"/></td>
+                      {% else %}
+                        <td colspan="2" class="panel-code"><code>{{ evt.result }}</code></td>
+                      {% endif %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
 
     <!-- Bootstrap core JavaScript
@@ -62,5 +102,6 @@
     <script src="/js/refresh.js"></script>
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/vmsh.js"></script>
   </body>
 </html>
