@@ -14,6 +14,8 @@ import boto.sqs.queue
 import boto.ec2
 import jinja2
 import datetime
+import tempfile
+import shutil
 
 LOG = logging.getLogger(__name__)
 EVENTS = None
@@ -181,12 +183,25 @@ def generate_skey(region, keyname):
 
     return os.path.join(mypath, keyname+".pem")
 
+def retrieve_playbook(pburl, dstpath):
+    LOG.info("retrieving playbook from %s", playbookurl)
+    f = urllib2.urlopen(pburl)
+    of = tempfile.NamedTemporaryFile(prefix='pb-', suffix='.yml', dir=dstpath, delete=False)
+    shutil.copyfileobj(f, of)
+    LOG.info("playbook saved in %s", of.name)
+    of.close()
+    return of.name
+
 def execute_playbook(keypath, pbvars):
     return_data = {}
 
     extra_vars = {}
 
     ignorerrors = pbvars.pop('IgnorePlaybookFailure', 'no')
+    playbookurl = pbvars.pop('PlaybookURL', None)
+    if playbookurl == None:
+        return False, 'No URL specified', None
+
     for k,v in pbvars.iteritems():
         if type(v) == dict and len(v) == 1:
             fname = v.keys()[0]
@@ -206,7 +221,9 @@ def execute_playbook(keypath, pbvars):
 
     mypath = os.path.dirname(os.path.realpath(__file__))
     module_path = os.path.join(mypath, 'ansible-pan', 'library')
-    playbook = os.path.join(mypath, "vm-series-playbook.yml")
+
+    # retrieve playbook
+    playbook = retrieve_playbook(playbookurl, mypath)
 
     playbook_cb = HelperPlaybookCallbacks()
     runner_cb = HelperRunnerCallbacks()

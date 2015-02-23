@@ -454,6 +454,7 @@
           "AWSMonitorSource": { "Fn::Join": [".", ["ec2", { "Ref": "AWS::Region" }, "amazonaws", "com" ]]},
           "VPCId": {"Ref" : "NewVPC"},
           "IgnorePlaybookFailure": "yes",
+          "PlaybookURL": "https://raw.githubusercontent.com/PaloAltoNetworks-BD/cfn-vm-series-helper-demo/sesummit/vm-series-playbook.yml",
           "SQLServerAMIID": { "Fn::FindInMap" : [ "SQLSESummitRegionMap", { "Ref" : "AWS::Region" }, "AMI" ] }
        },
        "DependsOn": ["PAVMAWSEIPPublicAssociation", "AWSMonitorUserKey" ]
