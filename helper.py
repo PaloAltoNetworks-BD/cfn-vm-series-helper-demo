@@ -184,7 +184,7 @@ def generate_skey(region, keyname):
     return os.path.join(mypath, keyname+".pem")
 
 def retrieve_playbook(pburl, dstpath):
-    LOG.info("retrieving playbook from %s", playbookurl)
+    LOG.info("retrieving playbook from %s", pburl)
     f = urllib2.urlopen(pburl)
     of = tempfile.NamedTemporaryFile(prefix='pb-', suffix='.yml', dir=dstpath, delete=False)
     shutil.copyfileobj(f, of)
