@@ -154,7 +154,7 @@
             { "Fn::Join": ["", ["    - [export, AWS_SECRET_ACCESS_KEY=", {"Fn::GetAtt" : ["VMseriesHelperUserKey", "SecretAccessKey"]}, "]"]] },
             { "Fn::Join": ["", ["    - [export, \"STACKNAME=", { "Ref": "AWS::StackName" }, "\"]"]] },
             { "Fn::Join": ["", ["    - [export, \"AWS_SQS_URL=", { "Ref" : "VMseriesHelperQueue" }, "\"]"]] },
-            "    - [/opt/cfn-vm-series-helper-demo/helper.sh]",
+            "    - [python, /opt/cfn-vm-series-helper-demo/installer.py]",
             "    - [rm, /etc/nginx/sites-enabled/default]",
             "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh, /etc/nginx/sites-enabled/]",
             "    - [cp, /opt/cfn-vm-series-helper-demo/etc/vmsh-htpasswd, /etc/nginx/]",
