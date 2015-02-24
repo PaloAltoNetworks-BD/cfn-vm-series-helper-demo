@@ -320,8 +320,8 @@ def main(args):
     awsregion = os.environ['AWS_REGION']
     sqsurl = os.environ['AWS_SQS_URL']
 
-    stackname = os.environ['STACKNAME']
-    keypath = generate_skey(awsregion, stackname)
+    keyname = os.environ['KEYNAME']
+    keypath = generate_skey(awsregion, keyname)
 
     sqsconn = boto.sqs.connect_to_region(awsregion)
     queue = boto.sqs.queue.Queue(connection=sqsconn, url=sqsurl)
