@@ -54,6 +54,7 @@ class WebUI(object):
             'reason': None,
             'data': None
         })
+        self._render()
 
     def set_request_result(self, success, reason, data=None):
         creq = self._get_current_request()
@@ -67,6 +68,7 @@ class WebUI(object):
             creq['status'] = 'failed'
         creq['reason'] = reason
         creq['data'] = data
+        self._render()
 
     def add_pb_event(self, title):
         creq = self._get_current_request()
