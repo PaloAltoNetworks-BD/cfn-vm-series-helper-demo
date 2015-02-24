@@ -10,7 +10,7 @@ stop on runlevel [!2345]
 env AWS_REGION=%(awsregion)s
 env AWS_ACCESS_KEY_ID=%(awsaccesskey)s
 env AWS_SECRET_ACCESS_KEY=%(awssecretaccesskey)s
-env "STACKNAME=%(stackname)s"
+env "KEYNAME=%(keyname)s"
 env "AWS_SQS_URL=%(awssqsurl)s"
 
 respawn
@@ -24,7 +24,7 @@ def main(args):
         'awsregion': os.environ['AWS_REGION'],
         'awsaccesskey': os.environ['AWS_ACCESS_KEY_ID'],
         'awssecretaccesskey': os.environ['AWS_SECRET_ACCESS_KEY'],
-        'stackname': os.environ['STACKNAME'],
+        'keyname': os.environ['KEYNAME'],
         'awssqsurl': os.environ['AWS_SQS_URL'],
         'helper': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'helper.py')
     }
