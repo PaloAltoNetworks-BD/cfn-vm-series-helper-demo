@@ -39,6 +39,11 @@ tr.reqselected {
 	background-color: rgb(230, 233, 217);
 }
 
+tr.request:hover {
+	text-decoration: underline;
+	cursor: pointer;	
+}
+
 span.task-ok {
 	color: #558a05;
 }
