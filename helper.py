@@ -380,7 +380,9 @@ def main(args):
         mypath = os.path.dirname(os.path.realpath(__file__))
         target = os.path.join(mypath, 'www', 'index.html')
         f = open(target, "wb")
+        f.write("<html><body><pre>\n")
         traceback.print_exc(file=f)
+        f.write("</pre></body></html>\n")
         f.close()
 
 if __name__ == "__main__":
