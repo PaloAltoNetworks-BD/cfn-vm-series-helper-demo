@@ -1,4 +1,5 @@
 import sys
+import traceback
 import os
 import os.path
 import time
@@ -316,7 +317,7 @@ def execute_playbook(keypath, pbvars):
 
     return True, "okey dokey", return_data
 
-def main(args):
+def _helper_main(args):
     global WEBUI
 
     awsregion = os.environ['AWS_REGION']
@@ -328,8 +329,7 @@ def main(args):
     sqsconn = boto.sqs.connect_to_region(awsregion)
     queue = boto.sqs.queue.Queue(connection=sqsconn, url=sqsurl)
     if queue is None:
-        LOG.critical("No queue found")
-        sys.exit(1)
+        raise Exception("Queue %s not found"%sqsurl)
 
     mypath = os.path.dirname(os.path.realpath(__file__))
     tpl = os.path.join(mypath, 'www', 'index.j2')
@@ -371,6 +371,17 @@ def main(args):
         WEBUI.waiting()
 
         queue.delete_message(msg)
+
+def main(args):
+    try:
+        _helper_main(args)
+    except:
+        # in case of Exception dump the stack trace to index.html
+        mypath = os.path.dirname(os.path.realpath(__file__))
+        target = os.path.join(mypath, 'www', 'index.html')
+        f = open(target, "wb")
+        traceback.print_exc(file=f)
+        f.close()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
