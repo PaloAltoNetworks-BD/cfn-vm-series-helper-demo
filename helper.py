@@ -386,7 +386,7 @@ def main(args):
         f.close()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)-15s %(levelname)s %(message)s')
     main(sys.argv[:1])
 
 
